@@ -1,0 +1,825 @@
+# =============================================================================
+# arx/metrics.yaml -- THE metric dictionary. Data, not code.
+#
+# NOTE ON THE COUNT: the column band spec in the template gives
+#   Headline 8 + P&L 12 + Asset Quality 10 + Capital 10 + Strategic/ESG 11
+#   + Technology 1 = 52 metric columns (spreadsheet columns 4..55).
+# The brief calls this "55 metrics"; the authoritative source is the column
+# list, so there are 52 entries below, in exactly template column order.
+# Add/remove entries here and the pipeline + Excel writer follow automatically.
+#
+# Fields
+#   key            : stable internal id (used by formulas.py, dna.py)
+#   excel_header   : must match the template's row-2 header EXACTLY
+#   column         : 1-based spreadsheet column (belt & braces; header wins)
+#   group          : row-1 band
+#   aliases        : regex list, case-insensitive, tried in order
+#   unit_type      : currency | percent | ratio | count | text
+#   applicable_to  : list of institution types: bank, sfb, nbfc, hfc, aifi
+#   tier           : A | B | C  (evidence requirement, Stage 14)
+#   sane_range     : [min, max] AFTER normalisation (currency = Rs. crore)
+#   derivable_from : formula id in formulas.py (optional)
+#   allow_negative : default false
+# =============================================================================
+
+metrics:
+
+  # ---------------------------- HEADLINE SIZE -----------------------------
+  - key: total_assets
+    excel_header: Total Assets
+    column: 4
+    group: Headline Size
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: A
+    sane_range: [100, 90000000]
+    aliases:
+      - 'Total\s+Assets'
+      - 'TOTAL\s+ASSETS'
+      - 'Total\s+of\s+Assets'
+      - 'Balance\s+Sheet\s+Size'
+      - 'Total\s+Assets\s*\(Rs\.?\s*in\s*crore\)'
+
+  - key: total_deposits
+    excel_header: Total Deposits
+    column: 5
+    group: Headline Size
+    unit_type: currency
+    applicable_to: [bank, sfb]
+    tier: A
+    sane_range: [10, 60000000]
+    aliases:
+      - 'Total\s+Deposits'
+      - '^Deposits$'
+      - 'Deposits\s*\(Schedule\s*3\)'
+      - 'Customer\s+Deposits'
+      - 'Aggregate\s+Deposits'
+
+  - key: gross_advances
+    excel_header: Total Advances (Gross)
+    column: 6
+    group: Headline Size
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: A
+    sane_range: [10, 60000000]
+    aliases:
+      - 'Gross\s+Advances'
+      - 'Total\s+Advances'
+      - 'Gross\s+Loans?\s*(?:and\s+Advances)?'
+      - 'Advances\s*\(Gross\)'
+      - 'Gross\s+Loan\s+Book'
+      - 'Gross\s+Credit\s+Exposure'
+      - '^Advances$'
+
+  - key: aum
+    excel_header: Assets Under Management (AUM)
+    column: 7
+    group: Headline Size
+    unit_type: currency
+    applicable_to: [nbfc, hfc, aifi]
+    tier: B
+    sane_range: [1, 30000000]
+    aliases:
+      - 'Assets?\s+Under\s+Management'
+      - '\bAUM\b'
+      - 'Loan\s+Assets\s+Under\s+Management'
+      - 'Managed\s+Assets'
+
+  - key: market_cap
+    excel_header: Market Capitalization
+    column: 8
+    group: Headline Size
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc]
+    tier: C
+    sane_range: [1, 3000000]
+    aliases:
+      - 'Market\s+Capitali[sz]ation'
+      - 'Market\s+Cap\b'
+      - 'Mcap\b'
+
+  - key: branches
+    excel_header: Total Branches
+    column: 9
+    group: Headline Size
+    unit_type: count
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [1, 30000]
+    aliases:
+      - 'Number\s+of\s+Branches'
+      - 'Total\s+Branches'
+      - 'Branch\s+Network'
+      - 'Branches\s*(?:as\s+(?:on|at))?'
+      - 'No\.?\s*of\s+Branches'
+
+  - key: employees
+    excel_header: Total Employee Count
+    column: 10
+    group: Headline Size
+    unit_type: count
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [10, 400000]
+    aliases:
+      - 'Number\s+of\s+Employees'
+      - 'Total\s+Employees'
+      - 'Employee\s+Strength'
+      - 'Total\s+Headcount'
+      - 'No\.?\s*of\s+Employees'
+      - 'Permanent\s+Employees'
+
+  - key: customers
+    excel_header: Total Customer Base (Numbers)
+    column: 11
+    group: Headline Size
+    unit_type: count
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [10000, 1000000000]
+    aliases:
+      - 'Customer\s+Base'
+      - 'Total\s+Customers'
+      - 'Number\s+of\s+Customers'
+      - 'Customers\s+Served'
+
+  # ---------------------------- PROFIT & LOSS -----------------------------
+  - key: interest_earned
+    excel_header: Interest Earned
+    column: 12
+    group: Profit & Loss
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: A
+    sane_range: [1, 5000000]
+    aliases:
+      - 'Interest\s+Earned'
+      - 'Interest\s+Income'
+      - 'Total\s+Interest\s+Income'
+      - 'Interest\s+earned\s*\(Schedule\s*13\)'
+      - 'Revenue\s+from\s+Operations\s*-\s*Interest'
+
+  - key: interest_expended
+    excel_header: Interest Expended
+    column: 13
+    group: Profit & Loss
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: A
+    sane_range: [1, 5000000]
+    aliases:
+      - 'Interest\s+Expended'
+      - 'Interest\s+Expense[sd]?'
+      - 'Finance\s+Cost[s]?'
+      - 'Interest\s+expended\s*\(Schedule\s*15\)'
+      - 'Total\s+Interest\s+Expense'
+
+  - key: nii
+    excel_header: Net Interest Income (NII)
+    column: 14
+    group: Profit & Loss
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: A
+    sane_range: [-100000, 3000000]
+    allow_negative: true
+    derivable_from: nii_identity
+    aliases:
+      - 'Net\s+Interest\s+Income'
+      - '\bNII\b'
+      - 'Interest\s+Income\s*\(net\)'
+      - 'Net\s+Interest\s+Earnings'
+
+  - key: other_income
+    excel_header: Other Income (Non-Interest)
+    column: 15
+    group: Profit & Loss
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [-50000, 2000000]
+    allow_negative: true
+    aliases:
+      - 'Other\s+Income'
+      - 'Non[-\s]?Interest\s+Income'
+      - 'Fee\s+and\s+Other\s+Income'
+      - 'Other\s+income\s*\(Schedule\s*14\)'
+
+  - key: opex
+    excel_header: Operating Expenses
+    column: 16
+    group: Profit & Loss
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [1, 2000000]
+    aliases:
+      - 'Operating\s+Expenses'
+      - 'Total\s+Operating\s+Expenses'
+      - 'Operating\s+Costs?'
+      - 'Operating\s+expenses\s*\(Schedule\s*16\)'
+      - 'Non[-\s]?Interest\s+Expense'
+
+  - key: employee_costs
+    excel_header: Employee Costs
+    column: 17
+    group: Profit & Loss
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [0.1, 500000]
+    aliases:
+      - 'Payments?\s+to\s+and\s+Provisions?\s+for\s+Employees'
+      - 'Employee\s+Costs?'
+      - 'Employee\s+Benefits?\s+Expenses?'
+      - 'Staff\s+Costs?'
+      - 'Personnel\s+Expenses'
+
+  - key: total_provisions
+    excel_header: Total Provisions
+    column: 18
+    group: Profit & Loss
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [-100000, 1000000]
+    allow_negative: true
+    aliases:
+      - 'Provisions?\s+and\s+Contingencies'
+      - 'Total\s+Provisions'
+      - 'Impairment\s+on\s+Financial\s+Instruments'
+      - 'Provisions?\s*\(other\s+than\s+tax\)'
+      - 'Expected\s+Credit\s+Loss'
+
+  - key: pat
+    excel_header: Profit After Tax (PAT)
+    column: 19
+    group: Profit & Loss
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: A
+    sane_range: [-200000, 1000000]
+    allow_negative: true
+    aliases:
+      - 'Profit\s+After\s+Tax'
+      - 'Net\s+Profit\s+for\s+the\s+(?:Year|Period)'
+      - 'Profit\s+for\s+the\s+(?:Year|Period)'
+      - '\bPAT\b'
+      - 'Net\s+Profit'
+
+  - key: nim
+    excel_header: Net Interest Margin (NIM) %
+    column: 20
+    group: Profit & Loss
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [0, 15]
+    aliases:
+      - 'Net\s+Interest\s+Margin'
+      - '\bNIM\b'
+      - 'Margin\s*\(NIM\)'
+
+  - key: roa
+    excel_header: Return on Assets (RoA) %
+    column: 21
+    group: Profit & Loss
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: A
+    sane_range: [-5, 5]
+    allow_negative: true
+    derivable_from: roa_identity
+    aliases:
+      - 'Return\s+on\s+(?:Average\s+)?Assets'
+      - '\bRoA\b'
+      - '\bROA\b'
+
+  - key: roe
+    excel_header: Return on Equity (RoE) %
+    column: 22
+    group: Profit & Loss
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: A
+    sane_range: [-50, 50]
+    allow_negative: true
+    derivable_from: roe_identity
+    aliases:
+      - 'Return\s+on\s+Equity'
+      - 'Return\s+on\s+Net\s+Worth'
+      - '\bRoE\b'
+      - '\bROE\b'
+      - 'Return\s+on\s+Shareholders?.?\s*Funds'
+
+  - key: cost_to_income
+    excel_header: Cost-to-Income Ratio %
+    column: 23
+    group: Profit & Loss
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [5, 95]
+    derivable_from: cost_to_income_identity
+    aliases:
+      - 'Cost\s*(?:-|to|/)\s*Income\s*Ratio'
+      - 'Cost\s+to\s+Income'
+      - 'Efficiency\s+Ratio'
+
+  # ---------------------------- ASSET QUALITY -----------------------------
+  - key: gnpa_amount
+    excel_header: Gross NPA (GNPA) Amount
+    column: 24
+    group: Asset Quality
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: A
+    sane_range: [0, 2000000]
+    derivable_from: gnpa_amount_identity
+    aliases:
+      - 'Gross\s+NPAs?\s*(?:Amount)?'
+      - 'Gross\s+Non[-\s]?Performing\s+Assets'
+      - '\bGNPA\b'
+      - 'Gross\s+NPA\s*\(Amount\)'
+
+  - key: nnpa_amount
+    excel_header: Net NPA (NNPA) Amount
+    column: 25
+    group: Asset Quality
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [0, 1500000]
+    aliases:
+      - 'Net\s+NPAs?\s*(?:Amount)?'
+      - 'Net\s+Non[-\s]?Performing\s+Assets'
+      - '\bNNPA\b'
+
+  - key: gnpa_ratio
+    excel_header: Gross NPA Ratio %
+    column: 26
+    group: Asset Quality
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: A
+    sane_range: [0, 40]
+    aliases:
+      - 'Gross\s+NPA\s*(?:Ratio|%|\(%\))'
+      - '%\s*of\s+Gross\s+NPAs?\s*to\s+Gross\s+Advances'
+      - 'GNPA\s*(?:Ratio|%)'
+      - 'Gross\s+NPA\s+to\s+Gross\s+Advances'
+
+  - key: nnpa_ratio
+    excel_header: Net NPA Ratio %
+    column: 27
+    group: Asset Quality
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [0, 25]
+    aliases:
+      - 'Net\s+NPA\s*(?:Ratio|%|\(%\))'
+      - '%\s*of\s+Net\s+NPAs?\s*to\s+Net\s+Advances'
+      - 'NNPA\s*(?:Ratio|%)'
+
+  - key: pcr
+    excel_header: Provision Coverage Ratio (PCR) %
+    column: 28
+    group: Asset Quality
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [0, 100]
+    derivable_from: pcr_identity
+    aliases:
+      - 'Provision\s+Coverage\s+Ratio'
+      - '\bPCR\b'
+      - 'Provisioning\s+Coverage\s+Ratio'
+
+  - key: slippage_ratio
+    excel_header: Slippage Ratio %
+    column: 29
+    group: Asset Quality
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [0, 20]
+    aliases:
+      - 'Slippage\s+Ratio'
+      - 'Gross\s+Slippage\s+Ratio'
+      - 'Fresh\s+Slippage\s+Ratio'
+
+  - key: write_offs
+    excel_header: Write-offs During Year
+    column: 30
+    group: Asset Quality
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [0, 500000]
+    aliases:
+      - 'Write[-\s]?offs?\s+during\s+the\s+year'
+      - 'Technical\s*/?\s*Prudential\s+Write[-\s]?offs?'
+      - 'Amounts?\s+Written\s+off'
+      - 'Bad\s+Debts\s+Written\s+Off'
+
+  - key: stage3_pct
+    excel_header: Stage 3 Assets % (NBFC)
+    column: 31
+    group: Asset Quality
+    unit_type: percent
+    applicable_to: [nbfc, hfc]
+    tier: C
+    sane_range: [0, 40]
+    aliases:
+      - 'Stage\s*3\s*(?:Assets|Loans)?\s*(?:Ratio|%|\(%\))?'
+      - 'Gross\s+Stage\s*3'
+      - 'Stage\s*III\s*Assets'
+
+  - key: standard_assets_provision
+    excel_header: Standard Assets Provision
+    column: 32
+    group: Asset Quality
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [0, 200000]
+    aliases:
+      - 'Provision\s+(?:for|on)\s+Standard\s+Assets'
+      - 'Standard\s+Assets?\s+Provision'
+      - 'General\s+Provision\s+on\s+Standard\s+Assets'
+
+  - key: credit_cost
+    excel_header: Credit Cost %
+    column: 33
+    group: Asset Quality
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [-2, 15]
+    allow_negative: true
+    aliases:
+      - 'Credit\s+Cost'
+      - 'Cost\s+of\s+Credit'
+      - 'Credit\s+Cost\s+Ratio'
+
+  # ------------------------- CAPITAL & SOLVENCY ---------------------------
+  - key: tier1
+    excel_header: Tier 1 Capital Ratio %
+    column: 34
+    group: Capital & Solvency
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [0, 40]
+    aliases:
+      - 'Tier\s*(?:1|I)\s*(?:Capital)?\s*(?:Ratio|Adequacy)?\s*(?:%|\(%\))?'
+      - 'Tier\s*1\s*CRAR'
+
+  - key: tier2
+    excel_header: Tier 2 Capital Ratio %
+    column: 35
+    group: Capital & Solvency
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [0, 15]
+    aliases:
+      - 'Tier\s*(?:2|II)\s*(?:Capital)?\s*(?:Ratio|Adequacy)?\s*(?:%|\(%\))?'
+      - 'Tier\s*2\s*CRAR'
+
+  - key: crar
+    excel_header: Total CRAR (CAR) %
+    column: 36
+    group: Capital & Solvency
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: A
+    sane_range: [0, 40]
+    derivable_from: crar_identity
+    aliases:
+      - '\bCRAR\b'
+      - 'Capital\s+Adequacy\s+Ratio'
+      - 'Total\s+Capital\s+Ratio'
+      - '\bCAR\b'
+      - 'Capital\s+to\s+Risk[-\s]?weighted\s+Assets\s+Ratio'
+
+  - key: cet1
+    excel_header: Common Equity Tier 1 (CET1) %
+    column: 37
+    group: Capital & Solvency
+    unit_type: percent
+    applicable_to: [bank, sfb]
+    tier: B
+    sane_range: [0, 35]
+    aliases:
+      - 'Common\s+Equity\s+Tier\s*(?:1|I)'
+      - '\bCET\s*-?\s*1\b'
+      - 'CET1\s+Ratio'
+
+  - key: debt_to_equity
+    excel_header: Debt-to-Equity Ratio
+    column: 38
+    group: Capital & Solvency
+    unit_type: ratio
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: B
+    sane_range: [0, 30]
+    aliases:
+      - 'Debt\s*(?:-|to|/)\s*Equity\s*(?:Ratio)?'
+      - 'Debt\s+Equity\s+Ratio'
+      - '\bD/E\b'
+      - 'Gearing\s+Ratio'
+
+  - key: net_worth
+    excel_header: Net Worth / Shareholders Equity
+    column: 39
+    group: Capital & Solvency
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: A
+    sane_range: [1, 5000000]
+    aliases:
+      - 'Net\s+Worth'
+      - "Shareholders?'?\\s*(?:Equity|Funds)"
+      - 'Total\s+Equity'
+      - 'Capital\s+and\s+Reserves'
+      - 'Equity\s+and\s+Reserves'
+
+  - key: pe_ratio
+    excel_header: Price-to-Earnings (P/E) Ratio
+    column: 40
+    group: Capital & Solvency
+    unit_type: ratio
+    applicable_to: [bank, sfb, nbfc, hfc]
+    tier: C
+    sane_range: [0, 150]
+    aliases:
+      - 'Price\s*(?:-|to|/)\s*Earnings\s*(?:Ratio)?'
+      - '\bP\s*/\s*E\b'
+      - 'PE\s+Ratio'
+
+  - key: pb_ratio
+    excel_header: Price-to-Book (P/B) Ratio
+    column: 41
+    group: Capital & Solvency
+    unit_type: ratio
+    applicable_to: [bank, sfb, nbfc, hfc]
+    tier: C
+    sane_range: [0, 20]
+    aliases:
+      - 'Price\s*(?:-|to|/)\s*Book\s*(?:Value)?\s*(?:Ratio)?'
+      - '\bP\s*/\s*B\b'
+      - 'PB\s+Ratio'
+
+  - key: dividend_yield
+    excel_header: Dividend Yield %
+    column: 42
+    group: Capital & Solvency
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc]
+    tier: C
+    sane_range: [0, 20]
+    aliases:
+      - 'Dividend\s+Yield'
+      - 'Yield\s+on\s+Dividend'
+
+  - key: credit_rating
+    excel_header: Credit Rating (Long Term)
+    column: 43
+    group: Capital & Solvency
+    unit_type: text
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: null
+    aliases:
+      - 'Long[-\s]?Term\s+(?:Credit\s+)?Rating'
+      - 'Credit\s+Rating'
+      - '(?:CRISIL|ICRA|CARE|India\s+Ratings|Brickwork)\s*(?:AAA|AA\+?|AA-?|A\+?)'
+
+  # --------------------------- STRATEGIC & ESG ----------------------------
+  - key: casa_ratio
+    excel_header: CASA Ratio %
+    column: 44
+    group: Strategic & ESG
+    unit_type: percent
+    applicable_to: [bank, sfb]
+    tier: B
+    sane_range: [0, 100]
+    aliases:
+      - 'CASA\s*(?:Ratio|%|\(%\))?'
+      - 'Current\s+and\s+Savings\s+Account\s*(?:Ratio)?'
+      - 'CASA\s+to\s+Total\s+Deposits'
+
+  - key: retail_mix
+    excel_header: Retail Mix %
+    column: 45
+    group: Strategic & ESG
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [0, 100]
+    aliases:
+      - 'Retail\s+Mix'
+      - 'Retail\s+(?:Loans?|Advances|Book)\s*(?:as\s*)?%'
+      - 'Share\s+of\s+Retail'
+      - 'Retail\s+Proportion'
+
+  - key: wholesale_mix
+    excel_header: Wholesale Mix %
+    column: 46
+    group: Strategic & ESG
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [0, 100]
+    derivable_from: wholesale_mix_identity
+    aliases:
+      - 'Wholesale\s+Mix'
+      - 'Wholesale\s+(?:Loans?|Advances|Book)\s*(?:as\s*)?%'
+      - 'Corporate\s+Mix'
+      - 'Share\s+of\s+Wholesale'
+
+  - key: tech_spend_pct
+    excel_header: Tech Spend (% of Opex)
+    column: 47
+    group: Strategic & ESG
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [0, 50]
+    aliases:
+      - 'Technology\s+Spend\s*(?:as\s*)?(?:%|percentage)\s*of\s*(?:Opex|Operating\s+Expenses)'
+      - 'IT\s+Spend\s*(?:as\s*)?%'
+      - 'Tech(?:nology)?\s+Spend\s*\(%\s*of\s*Opex\)'
+
+  - key: digital_txn_share
+    excel_header: Digital Transaction Share %
+    column: 48
+    group: Strategic & ESG
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [0, 100]
+    aliases:
+      - 'Digital\s+Transactions?\s*(?:Share|Mix|%)'
+      - 'Share\s+of\s+Digital\s+Transactions?'
+      - '(?:%|Percentage)\s*of\s+Transactions?\s+(?:done\s+)?Digitally'
+
+  - key: mobile_app_users
+    excel_header: Mobile App Users (Active)
+    column: 49
+    group: Strategic & ESG
+    unit_type: count
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [100, 500000000]
+    aliases:
+      - '(?:Active\s+)?Mobile\s+(?:Banking\s+)?(?:App\s+)?Users'
+      - 'Mobile\s+App\s+Users'
+      - 'Monthly\s+Active\s+Users'
+      - '\bMAU\b'
+
+  - key: csr_spend
+    excel_header: CSR Spending Amount
+    column: 50
+    group: Strategic & ESG
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [0, 10000]
+    aliases:
+      - 'CSR\s+(?:Spend(?:ing)?|Expenditure|Amount\s+Spent)'
+      - 'Corporate\s+Social\s+Responsibility\s+(?:Spend|Expenditure)'
+      - 'Amount\s+spent\s+(?:on|during\s+the\s+year)\s+(?:on\s+)?CSR'
+
+  - key: board_gender_diversity
+    excel_header: Board Gender Diversity %
+    column: 51
+    group: Strategic & ESG
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [0, 100]
+    aliases:
+      - 'Board\s+Gender\s+Diversity'
+      - '(?:%|Percentage)\s*of\s+Women\s+(?:Directors|on\s+the\s+Board)'
+      - 'Women\s+Directors?\s*(?:%|\(%\))'
+      - 'Gender\s+Diversity\s+(?:on\s+the\s+)?Board'
+
+  - key: psl_pct
+    excel_header: Priority Sector Lending (PSL) %
+    column: 52
+    group: Strategic & ESG
+    unit_type: percent
+    applicable_to: [bank, sfb, aifi]
+    tier: C
+    sane_range: [0, 100]
+    aliases:
+      - 'Priority\s+Sector\s+Lending\s*(?:%|Ratio)?'
+      - '\bPSL\b\s*(?:%|Ratio)?'
+      - 'Priority\s+Sector\s+Advances\s*(?:as\s*)?(?:%|percentage)'
+
+  - key: esg_rating
+    excel_header: ESG Rating (CRISIL/MSCI)
+    column: 53
+    group: Strategic & ESG
+    unit_type: text
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: null
+    aliases:
+      - 'ESG\s+Rating'
+      - 'ESG\s+Score'
+      - '(?:MSCI|CRISIL|Sustainalytics)\s+ESG\s+(?:Rating|Score)'
+
+  - key: promoter_holding
+    excel_header: Promoter Holding %
+    column: 54
+    group: Strategic & ESG
+    unit_type: percent
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [0, 100]
+    aliases:
+      - 'Promoter\s+(?:and\s+Promoter\s+Group\s+)?(?:Share)?holding'
+      - 'Promoters?\s+Stake'
+      - 'Shareholding\s+of\s+Promoters?'
+
+  # ------------------------------ TECHNOLOGY ------------------------------
+  - key: tech_investment
+    excel_header: Investment in Technology in last FY
+    column: 55
+    group: Technology
+    unit_type: currency
+    applicable_to: [bank, sfb, nbfc, hfc, aifi]
+    tier: C
+    sane_range: [0, 50000]
+    aliases:
+      - 'Investment\s+in\s+Technology'
+      - 'Technology\s+(?:Investment|Spend(?:ing)?|Expenditure)'
+      - 'IT\s+(?:Investment|Capex|Spend)'
+      - 'Digital\s+and\s+Technology\s+Investment'
+
+# -----------------------------------------------------------------------------
+# Banking-logic rules (Stage 9, Level 2). Evaluated only when BOTH sides exist.
+#   op: gt | gte | lt | lte | approx_sum | positive
+# -----------------------------------------------------------------------------
+banking_rules:
+  - id: gnpa_gt_nnpa
+    left: gnpa_amount
+    op: gte
+    right: nnpa_amount
+    message: "Gross NPA must be >= Net NPA"
+  - id: gnpa_ratio_gt_nnpa_ratio
+    left: gnpa_ratio
+    op: gte
+    right: nnpa_ratio
+    message: "Gross NPA % must be >= Net NPA %"
+  - id: roe_gt_roa
+    left: roe
+    op: gte
+    right: roa
+    message: "RoE must be >= RoA (leverage is >= 1x)"
+  - id: car_gt_cet1
+    left: crar
+    op: gte
+    right: cet1
+    message: "Total CRAR must be >= CET1"
+  - id: car_gt_tier1
+    left: crar
+    op: gte
+    right: tier1
+    message: "Total CRAR must be >= Tier 1"
+  - id: assets_gt_advances
+    left: total_assets
+    op: gt
+    right: gross_advances
+    message: "Total Assets must exceed Gross Advances"
+  - id: assets_gt_deposits
+    left: total_assets
+    op: gt
+    right: total_deposits
+    message: "Total Assets must exceed Total Deposits"
+  - id: pcr_under_100
+    left: pcr
+    op: lte
+    right: 100
+    message: "PCR cannot exceed 100%"
+  - id: tier_sum_is_crar
+    left: [tier1, tier2]
+    op: approx_sum
+    right: crar
+    tolerance: 0.30
+    message: "Tier 1 + Tier 2 must be approximately equal to CRAR"
+  - id: interest_earned_gt_expended
+    left: interest_earned
+    op: gt
+    right: interest_expended
+    message: "Interest Earned normally exceeds Interest Expended"
+    severity: soft
+  - id: net_worth_positive
+    left: net_worth
+    op: positive
+    message: "Net Worth must be positive"

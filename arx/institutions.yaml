@@ -1,0 +1,239 @@
+# =============================================================================
+# arx/institutions.yaml -- alias table for institution identification (Stage 2)
+#
+#   canonical : the name written into Excel column C (must match the template)
+#   category  : written into Excel column B when a NEW row is appended
+#   type      : bank | sfb | nbfc | hfc | aifi  -> drives `applicable_to`
+#   aliases   : plain strings, matched case/punctuation-insensitively and fuzzily
+#   cin       : optional Corporate Identity Number (a very strong signal)
+#   ticker    : optional NSE ticker
+#
+# `the Bank` / `the Company` are deliberately NOT aliases: they are generic and
+# would match every report. They are used only as *self-reference* confirmations
+# once a canonical name has already been established from the cover page.
+# =============================================================================
+
+default_category_by_type:
+  bank: Private Sector Bank
+  sfb: Small Finance Bank
+  nbfc: NBFC
+  hfc: Housing Finance Company
+  aifi: All-India Financial Institution
+
+institutions:
+
+  - canonical: State Bank of India (SBI)
+    category: D-SIB
+    type: bank
+    ticker: SBIN
+    cin: L65190MH1955PLC000018
+    aliases: [State Bank of India, SBI, State Bank, SBI Bank]
+
+  - canonical: HDFC Bank Limited
+    category: D-SIB
+    type: bank
+    ticker: HDFCBANK
+    cin: L65920MH1994PLC080618
+    aliases: [HDFC Bank, HDFC Bank Ltd, HDFC Bank Limited, HDFCBANK]
+
+  - canonical: ICICI Bank Limited
+    category: D-SIB
+    type: bank
+    ticker: ICICIBANK
+    cin: L65190GJ1994PLC021012
+    aliases: [ICICI Bank, ICICI Bank Ltd, ICICI Bank Limited, ICICI, ICICIBANK]
+
+  - canonical: Axis Bank Limited
+    category: Private Sector Bank
+    type: bank
+    ticker: AXISBANK
+    cin: L65110GJ1993PLC020769
+    aliases: [Axis Bank, Axis Bank Ltd, Axis Bank Limited, UTI Bank]
+
+  - canonical: Kotak Mahindra Bank Limited
+    category: Private Sector Bank
+    type: bank
+    ticker: KOTAKBANK
+    cin: L65110MH1985PLC038137
+    aliases: [Kotak Mahindra Bank, Kotak Bank, Kotak Mahindra Bank Ltd]
+
+  - canonical: IndusInd Bank Limited
+    category: Private Sector Bank
+    type: bank
+    ticker: INDUSINDBK
+    aliases: [IndusInd Bank, IndusInd Bank Ltd, Indusind]
+
+  - canonical: Yes Bank Limited
+    category: Private Sector Bank
+    type: bank
+    ticker: YESBANK
+    aliases: [Yes Bank, YES BANK, Yes Bank Ltd]
+
+  - canonical: IDFC First Bank Limited
+    category: Private Sector Bank
+    type: bank
+    ticker: IDFCFIRSTB
+    aliases: [IDFC FIRST Bank, IDFC First Bank Ltd, IDFC Bank]
+
+  - canonical: Federal Bank Limited
+    category: Private Sector Bank
+    type: bank
+    ticker: FEDERALBNK
+    aliases: [Federal Bank, The Federal Bank Limited, The Federal Bank Ltd]
+
+  - canonical: Bank of Baroda
+    category: Public Sector Bank
+    type: bank
+    ticker: BANKBARODA
+    aliases: [Bank of Baroda, BoB, BOB, Baroda Bank]
+
+  - canonical: Punjab National Bank
+    category: Public Sector Bank
+    type: bank
+    ticker: PNB
+    aliases: [Punjab National Bank, PNB]
+
+  - canonical: Canara Bank
+    category: Public Sector Bank
+    type: bank
+    ticker: CANBK
+    aliases: [Canara Bank, Canara]
+
+  - canonical: Union Bank of India
+    category: Public Sector Bank
+    type: bank
+    ticker: UNIONBANK
+    aliases: [Union Bank of India, Union Bank]
+
+  - canonical: Bank of India
+    category: Public Sector Bank
+    type: bank
+    ticker: BANKINDIA
+    aliases: [Bank of India, BoI]
+
+  - canonical: Indian Bank
+    category: Public Sector Bank
+    type: bank
+    ticker: INDIANB
+    aliases: [Indian Bank]
+
+  - canonical: Central Bank of India
+    category: Public Sector Bank
+    type: bank
+    ticker: CENTRALBK
+    aliases: [Central Bank of India]
+
+  - canonical: AU Small Finance Bank Limited
+    category: Small Finance Bank
+    type: sfb
+    ticker: AUBANK
+    aliases: [AU Small Finance Bank, AU Bank, AU SFB]
+
+  - canonical: Equitas Small Finance Bank Limited
+    category: Small Finance Bank
+    type: sfb
+    ticker: EQUITASBNK
+    aliases: [Equitas Small Finance Bank, Equitas SFB]
+
+  - canonical: Ujjivan Small Finance Bank Limited
+    category: Small Finance Bank
+    type: sfb
+    ticker: UJJIVANSFB
+    aliases: [Ujjivan Small Finance Bank, Ujjivan SFB]
+
+  - canonical: Bajaj Finance Limited
+    category: NBFC
+    type: nbfc
+    ticker: BAJFINANCE
+    aliases: [Bajaj Finance, Bajaj Finance Ltd, BFL]
+
+  - canonical: Shriram Finance Limited
+    category: NBFC
+    type: nbfc
+    ticker: SHRIRAMFIN
+    aliases: [Shriram Finance, Shriram Transport Finance, STFC, Shriram Transport Finance Company]
+
+  - canonical: Cholamandalam Investment and Finance Company Limited
+    category: NBFC
+    type: nbfc
+    ticker: CHOLAFIN
+    aliases: [Cholamandalam Investment and Finance, Chola, Cholamandalam, CIFCL]
+
+  - canonical: Muthoot Finance Limited
+    category: NBFC
+    type: nbfc
+    ticker: MUTHOOTFIN
+    aliases: [Muthoot Finance, Muthoot]
+
+  - canonical: L&T Finance Holdings Limited
+    category: NBFC
+    type: nbfc
+    ticker: LTF
+    aliases: [L&T Finance, LTFH, L and T Finance Holdings, L&T Finance Holdings]
+
+  - canonical: Mahindra & Mahindra Financial Services Limited
+    category: NBFC
+    type: nbfc
+    ticker: M&MFIN
+    aliases: [Mahindra Finance, M&M Financial Services, Mahindra and Mahindra Financial Services, MMFSL]
+
+  - canonical: Tata Capital Limited
+    category: NBFC
+    type: nbfc
+    aliases: [Tata Capital, Tata Capital Financial Services, TCL]
+
+  - canonical: LIC Housing Finance Limited
+    category: Housing Finance Company
+    type: hfc
+    ticker: LICHSGFIN
+    aliases: [LIC Housing Finance, LICHFL, LIC HFL]
+
+  - canonical: PNB Housing Finance Limited
+    category: Housing Finance Company
+    type: hfc
+    ticker: PNBHOUSING
+    aliases: [PNB Housing Finance, PNB Housing]
+
+  - canonical: Can Fin Homes Limited
+    category: Housing Finance Company
+    type: hfc
+    ticker: CANFINHOME
+    aliases: [Can Fin Homes, CanFin Homes]
+
+  - canonical: NABARD
+    category: All-India Financial Institution
+    type: aifi
+    aliases: [National Bank for Agriculture and Rural Development, NABARD]
+
+  - canonical: SIDBI
+    category: All-India Financial Institution
+    type: aifi
+    aliases: [Small Industries Development Bank of India, SIDBI]
+
+  - canonical: EXIM Bank
+    category: All-India Financial Institution
+    type: aifi
+    aliases: [Export-Import Bank of India, EXIM Bank, Exim Bank of India]
+
+  - canonical: NHB
+    category: All-India Financial Institution
+    type: aifi
+    aliases: [National Housing Bank, NHB]
+
+  - canonical: REC Limited
+    category: All-India Financial Institution
+    type: aifi
+    ticker: RECLTD
+    aliases: [REC Limited, Rural Electrification Corporation, REC Ltd, REC]
+
+  - canonical: Power Finance Corporation Limited
+    category: All-India Financial Institution
+    type: aifi
+    ticker: PFC
+    aliases: [Power Finance Corporation, PFC, Power Finance Corporation Ltd]
+
+  - canonical: IRFC
+    category: All-India Financial Institution
+    type: aifi
+    ticker: IRFC
+    aliases: [Indian Railway Finance Corporation, IRFC]

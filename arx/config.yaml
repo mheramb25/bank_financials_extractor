@@ -1,0 +1,168 @@
+# =============================================================================
+# arx/config.yaml  --  every weight, penalty, threshold and tolerance.
+# Nothing in the Python code hard-codes any of these numbers.
+# =============================================================================
+
+# --- Stage 3: page ranking -----------------------------------------------
+# Source quality (Stage 6) reuses these exact weights, so a page's rank and a
+# candidate's source quality are always consistent.
+section_weights:
+  financial_statements: 1.00   # Balance Sheet, P&L, Schedules 1-18, Notes
+  financial_highlights: 0.92   # "Performance at a Glance"
+  multi_year_summary:   0.80   # 10-year / 5-year summary
+  key_ratios:           0.80   # Key ratios, Basel III Pillar-3
+  mdna:                 0.60   # Management Discussion & Analysis
+  narrative:            0.30   # Chairman's letter, ESG prose, BRSR
+  unknown:              0.40
+
+ranking:
+  # A page must score at least this to be visited at all.
+  min_page_score: 0.05
+  # Table density bonus: fraction of the page's lines that look tabular.
+  table_density_weight: 0.25
+  unit_caption_bonus: 0.15     # page contains "(Rs. in crore)" style caption
+  schedule_number_bonus: 0.10  # page contains "Schedule 12" etc.
+  max_pages_visited: 400       # hard cap; 0 = no cap
+
+# --- Stage 1: OCR ---------------------------------------------------------
+ocr:
+  enabled: true
+  lang: eng
+  dpi: 300
+  # A page is considered "scanned" if it has fewer than this many chars ...
+  scanned_char_threshold: 50
+  # ... and its images cover at least this fraction of the page area.
+  scanned_image_area_ratio: 0.30
+  # Lazy OCR: only OCR the top-N ranked pages that look scanned.
+  max_pages: 60
+
+# --- Stage 8: courtroom ---------------------------------------------------
+defence:
+  # Bonuses, summed, then clipped to [0, 100].
+  base: 20
+  in_financial_statements: 30
+  in_financial_highlights: 22
+  in_multi_year_summary: 14
+  in_key_ratios: 14
+  in_mdna: 8
+  in_narrative: 2
+  multi_section_agreement: 18   # per extra INDEPENDENT section that agrees
+  multi_alias_agreement: 8      # per extra distinct alias that agrees
+  explicit_unit_caption: 8      # the value's table declared its unit
+  year_column_explicit: 12      # the column header explicitly named the year
+  from_structured_table: 10     # table cell, not a sentence in prose
+  row_label_exact: 6            # row label matched an alias exactly, not fuzzily
+
+prosecutors:
+  # Penalties are subtracted from the defence score.
+  year_mismatch:
+    penalty: 60                 # highest-priority prosecutor: can sink a candidate alone
+    unlabelled_column_penalty: 12   # softer: many valid tables do not print FY in every header
+  conflicting_values:
+    penalty: 22                 # a same-or-better-sourced candidate disagrees
+    relative_tolerance: 0.005   # values within 0.5% are "the same value"
+    minority_extra_penalty: 12  # this candidate is in the minority
+  unit_mismatch:
+    penalty: 35                 # scale of the value is inconsistent with its caption
+    foreign_currency_penalty: 70  # USD table (EXIM / Tata style) -> effectively fatal
+    implied_scale_penalty: 15   # scale had to be inferred, not read
+  table_alignment:
+    penalty: 30                 # value likely came from the neighbouring column/row
+    fuzzy_row_label_threshold: 88  # rapidfuzz score below this = suspicious row match
+    neighbour_column_penalty: 20
+
+# --- Stage 9/10: financial DNA -------------------------------------------
+dna:
+  # Each failed check subtracts this from the DNA score (which starts at 1.0).
+  level1_range_violation: 0.50   # value outside metrics.yaml sane_range
+  level2_rule_violation: 0.30    # per broken banking-logic rule
+  level3_history_deviation: 0.15 # implausible vs the same institution's other years
+  level4_peer_deviation: 0.10    # implausible vs peers in the same FY & category
+  history_yoy_warn: 0.30         # >30% YoY move -> "investigate"
+  history_yoy_severe: 5.00       # >500% YoY move -> heavy flag (never auto-reject)
+  peer_zscore_warn: 3.0
+  peer_min_sample: 3
+  reverse_validation_penalty: 18 # the number is also another metric's printed value
+  reverse_validation_extra_per_collision: 8
+  reverse_validation_max_penalty: 65
+  reverse_validation_scope_pages: 0   # 0 = whole document
+
+# --- Stage 11/12/13: formulas, sanity, trend ------------------------------
+formulas:
+  relative_tolerance: 0.01   # +/-1% for derived AMOUNTS
+  absolute_tolerance_pp: 0.10  # +/-0.1 percentage points for RATIOS
+  derived_confidence_cap: 90
+  # A derivation is only attempted if every input is at least this confident.
+  derive_min_input_confidence: 60
+  formula_pass_score: 1.00
+  formula_fail_score: 0.25
+  formula_na_score: 0.60     # neutral: no formula applies to this metric
+
+trend:
+  normal_change_pct: 30.0    # <=30% YoY is unremarkable
+  investigate_change_pct: 200.0
+  severe_change_pct: 500.0
+  investigate_penalty: 0.20  # subtracted from trend score (starts at 1.0)
+  severe_penalty: 0.45
+
+# --- Stage 14: evidence requirements by metric tier -----------------------
+tiers:
+  A:   # PAT, NII, Deposits, Advances, RoE, RoA, Total Assets, GNPA, CRAR
+    independent_sources_for_full_marks: 3
+    min_independent_sources: 2
+    single_source_evidence_score: 0.35
+  B:   # CASA, PCR, Employees, Branches, NIM, Cost-to-Income
+    independent_sources_for_full_marks: 2
+    min_independent_sources: 1
+    single_source_evidence_score: 0.70
+  C:   # ESG, mobile app users, tech spend, board diversity, CSR ...
+    independent_sources_for_full_marks: 1
+    min_independent_sources: 1
+    single_source_evidence_score: 1.00
+
+# --- Stage 15: confidence engine -----------------------------------------
+# Weights must sum to 1.0. Each component is normalised to [0, 1] first.
+confidence_weights:
+  court: 0.34       # defence - prosecutors
+  source: 0.18      # section quality of the winning candidate
+  evidence: 0.18    # independent corroboration, tier-aware
+  dna: 0.15         # ranges + banking logic + history + peers
+  formula: 0.10     # arithmetic identities
+  trend: 0.05       # YoY plausibility
+
+decision_bands:
+  auto_approve: 95   # >= 95            -> write
+  high: 80           # 80..94           -> write
+  manual_review: 50  # 50..79           -> write + flag + cell comment
+  # < 65             -> reject -> write ND + Missing Cells Report
+
+# --- Excel writing --------------------------------------------------------
+excel:
+  nd_sentinel: ND
+  na_sentinel: NA
+  # Never downgrade a real number to ND; only overwrite when strictly better.
+  overwrite_only_if_more_confident: true
+  # A value that was already in the template did not come from this pipeline and
+  # carries no recorded confidence. This is the confidence we assume for it when
+  # deciding whether a freshly extracted value may replace it. 0 = a new value
+  # that clears the write threshold always wins; raise it to protect hand-keyed
+  # template data from being overwritten by extraction.
+  assumed_existing_confidence: 0
+  add_cell_comment_below: 80   # comment on any cell written below this confidence
+  clone_sheet_source: FY23-24  # layout donor when a new FY sheet is needed
+  audit_sheet: Audit Trail
+  summary_sheet: Confidence Summary
+  missing_sheet: Missing Cells Report
+  first_data_row: 3
+  name_column: 3
+  category_column: 2
+  srno_column: 1
+  first_metric_column: 4
+  fuzzy_name_match_threshold: 88
+
+# --- Runtime --------------------------------------------------------------
+runtime:
+  cache_dir: .cache
+  audit_dir: audit
+  workers: 1
+  random_seed: 20240401
