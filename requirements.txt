@@ -1,0 +1,34 @@
+# arx -- fully offline. No LLM client, no HTTP client, nothing that phones home.
+# Python 3.11
+
+# --- PDF parsing ---------------------------------------------------------
+pdfplumber==0.11.4
+camelot-py[cv]==0.11.0
+pypdf==4.3.1              # camelot 0.11 dependency, pinned so it stays compatible
+opencv-python-headless==4.10.0.84
+ghostscript==0.7          # camelot 'lattice' shells out to gs (see README)
+
+# --- OCR (lazy: only for scanned pages that survive ranking) -------------
+pytesseract==0.3.13
+pdf2image==1.17.0
+Pillow==10.4.0
+
+# --- Excel ----------------------------------------------------------------
+openpyxl==3.1.5
+
+# --- Data / matching ------------------------------------------------------
+pandas==2.2.3
+numpy==1.26.4
+rapidfuzz==3.10.1
+
+# --- Config / models / plumbing ------------------------------------------
+PyYAML==6.0.2
+pydantic==2.9.2
+joblib==1.4.2
+tqdm==4.66.5
+
+# --- UI -------------------------------------------------------------------
+streamlit==1.39.0
+
+# --- Tests ----------------------------------------------------------------
+pytest==8.3.3
